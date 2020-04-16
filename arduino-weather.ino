@@ -26,8 +26,6 @@ void loop() {
   if (inputAccepted && digitalRead(switchPin)) {
     inputAccepted = false;
     backgroundEnabled = !backgroundEnabled;
-    Serial.print("Background changed to: ");
-    Serial.println(backgroundEnabled);
     if (backgroundEnabled) {
       digitalWrite(backgroundPin, HIGH);
     } else {
@@ -42,8 +40,6 @@ void serialEvent() {
   lcd.setCursor(0, 0);
   currentText = Serial.readString();
   if (currentText != "" && currentText != NULL) {
-    Serial.print("Text received: ");
-    Serial.println(currentText);
     line1Text = currentText.substring(0, 16);
     line2Text = currentText.substring(16, 32);
     lcd.print(line1Text);
