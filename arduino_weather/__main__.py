@@ -33,7 +33,7 @@ def get_weather() -> Dict[str, str]:
             client.weather_at_place(location).get_weather().get_temperature("celsius")
         )
         city = location.split(",")[0][:7]
-        result[city] = temperature["temp"]
+        result[city] = str(temperature["temp"])
     logger.info("Got weather update")
     return result
 
@@ -52,7 +52,7 @@ def main():
         if dry:
             logger.info(f"Write {json_string} to LCD")
         else:
-            lcd.write(json_string)
+            lcd.write(bytes(json_string, "utf-8"))
             time.sleep(refresh_time)
 
 
