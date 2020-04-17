@@ -2,6 +2,7 @@ import serial
 import time
 import datetime
 import os
+import json
 import sys
 import threading
 import distutils.util
@@ -23,17 +24,10 @@ dry = distutils.util.strtobool(os.getenv("DRY_MODE", "False"))
 client = pyowm.OWM(api_key)
 
 
-class StoppableThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        self.running = True
-        super().__init__(*args, **kwargs)
-
-    def stop(self):
-        self.running = False
-
-
 def get_weather() -> Dict[str, str]:
-    result = {}
+    result = {
+        "date": str(datetime.datetime.now(tz))
+    }
     for location in locations.split(";"):
         temperature = (
             client.weather_at_place(location).get_weather().get_temperature("celsius")
@@ -54,39 +48,12 @@ def main():
         time.sleep(5)
     while True:
         weather = get_weather()
-        thread: StoppableThread = LEDUpdateTask(args=(lcd, weather,), daemon=True)
-        thread.start()
-        logger.info("Started thread")
-        time.sleep(refresh_time)
-        thread.stop()
-        thread.join()
-
-
-class LEDUpdateTask(StoppableThread):
-    def __init__(self, *args, **kwargs):
-        self.lcd = kwargs.get("args")[0]
-        self.weather = kwargs.get("args")[1]
-        super(LEDUpdateTask, self).__init__(*args, **kwargs)
-
-    def run(self):
-        while self.running:
-            self.update_locations()
-
-    def update_locations(self):
-        places_change_time = 3
-        for location, temperature in self.weather.items():
-            lcd_text = f"{location} {temperature} C"
-            lcd_text_length = len(lcd_text)
-            if lcd_text_length < 16:
-                for i in range(lcd_text_length, 16):
-                    lcd_text += " "
-            lcd_text += str(datetime.datetime.now(tz))
-            logger.info(f"Send {lcd_text}")
-            if dry:
-                logger.info("LCD text send")
-            else:
-                self.lcd.write(bytes(lcd_text, "utf-8"))
-            time.sleep(places_change_time)
+        json_string = json.dumps(weather)
+        if dry:
+            logger.info(f"Write {json_string} to LCD")
+        else:
+            lcd.write(json_string)
+            time.sleep(refresh_time)
 
 
 if __name__ == "__main__":
