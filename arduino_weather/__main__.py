@@ -25,9 +25,7 @@ client = pyowm.OWM(api_key)
 
 
 def get_weather() -> Dict[str, str]:
-    result = {
-        "date": str(datetime.datetime.now(tz))
-    }
+    result = {"date": str(datetime.datetime.now(tz))[:16]}
     for location in locations.split(";"):
         temperature = (
             client.weather_at_place(location).get_weather().get_temperature("celsius")
@@ -53,7 +51,7 @@ def main():
             logger.info(f"Write {json_string} to LCD")
         else:
             lcd.write(bytes(json_string, "utf-8"))
-            time.sleep(refresh_time)
+        time.sleep(refresh_time)
 
 
 if __name__ == "__main__":

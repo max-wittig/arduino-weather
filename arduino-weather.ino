@@ -7,7 +7,7 @@ const int contrastPin = A5;
 const int switchPin = 13;
 const int backgroundPin = 8;
 
-boolean backgroundEnabled = true;
+boolean backgroundEnabled = false;
 boolean switchState = true;
 boolean inputAccepted = true;
 
@@ -25,7 +25,7 @@ void setup() {
   pinMode(backgroundPin, OUTPUT);
   pinMode(switchPin, INPUT);
   analogWrite(contrastPin, 100);
-  digitalWrite(backgroundPin, HIGH);
+  digitalWrite(backgroundPin, LOW);
   Serial.begin(9600);
   lcd.begin(16, 2);
 }
@@ -53,7 +53,6 @@ void cycleLocations() {
 }
 
 void showOnDisplay(String line1) {
-  lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print(line1);
   lcd.setCursor(0, 1);
