@@ -17,6 +17,7 @@ typedef struct {
   const char* city;
   const char* temp;
 } Location;
+int numberOfLocations = 0;
 
 Location locations[10];
 int currentIndex = 0;
@@ -68,7 +69,7 @@ void showOnDisplay(void *) {
   lcd.print(line1Buffer);
   lcd.setCursor(0, 1);
   lcd.print(currentDate);
-  if (currentIndex < sizeof(locations) / sizeof(locations[0]) - 1) {
+  if (currentIndex < numberOfLocations-1) {
     currentIndex++;
   } else {
     currentIndex = 0;
@@ -80,6 +81,7 @@ void serialEvent() {
   if (currentText != "" && currentText != NULL) {
     // clear locations
     memset(locations, 0, sizeof(locations));
+    numberOfLocations = 0;
     DynamicJsonDocument doc(200);
     deserializeJson(doc, currentText);
     JsonObject root = doc.as<JsonObject>();
@@ -94,6 +96,7 @@ void serialEvent() {
         const char* cityName = strdup(key);
         locations[i] = Location{cityName, value};
         i++;
+        numberOfLocations++;
       }
     }
     hasNewWeatherData = true;
