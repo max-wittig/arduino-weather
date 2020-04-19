@@ -18,7 +18,7 @@ typedef struct {
   const char* temp;
 } Location;
 
-Location locations[3];
+Location locations[10];
 int currentIndex = 0;
 
 char* currentDate = "";
