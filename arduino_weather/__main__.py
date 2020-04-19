@@ -45,12 +45,11 @@ def main():
         lcd = serial.Serial(serial_device, 9600, timeout=0)
         time.sleep(5)
     while True:
-        weather = get_weather()
-        json_string = json.dumps(weather)
-        if dry:
-            logger.info(f"Write {json_string} to LCD")
-        else:
-            lcd.write(bytes(json_string, "utf-8"))
+        weather = json.dumps(get_weather())
+        logger.info(f"Write {weather} to LCD")
+        if not dry:
+            lcd.write(bytes(weather, "utf-8"))
+        logger.info(f"Sleeping for {refresh_time}")
         time.sleep(refresh_time)
 
 

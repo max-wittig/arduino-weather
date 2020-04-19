@@ -13,18 +13,17 @@ boolean backgroundEnabled = true;
 boolean switchState = true;
 boolean inputAccepted = true;
 
-unsigned long previousMillis = 0;
-
-typedef struct { 
-  const char* name;
+typedef struct {
+  const char* city;
   const char* temp;
 } Location;
 
-Location locations[10]{};
+Location locations[3];
+int currentIndex = 0;
 
-String currentDate = "";
-String currentLocationString = "";
+char* currentDate = "";
 boolean hasNewWeatherData = false;
+Timer<>::Task currentTask;
 
 void setup() {
   pinMode(contrastPin, OUTPUT);
@@ -51,25 +50,29 @@ void loop() {
 
   if (hasNewWeatherData) {
     hasNewWeatherData = false;
-    cycleLocations();
+    timer.cancel(currentTask);
+    currentTask = timer.every(3000, showOnDisplay);
   }
   timer.tick();
 }
 
-void cycleLocations() {
-  int timeout = 0;
-  for(const Location &location : locations) {
-    timeout += 3000;
-    currentLocationString = String(location.name) + " " + String(location.temp) + " C";
-    timer.every(timeout, showOnDisplay);
-  }
-}
-
 void showOnDisplay(void *) {
+  lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print(currentLocationString);
+  Location* loc = &locations[currentIndex];
+  char line1Buffer[16];
+  strcpy(line1Buffer, loc->city);
+  strcat(line1Buffer, " ");
+  strcat(line1Buffer, loc->temp);
+  strcat(line1Buffer, " C");
+  lcd.print(line1Buffer);
   lcd.setCursor(0, 1);
   lcd.print(currentDate);
+  if (currentIndex < sizeof(locations) / sizeof(locations[0]) - 1) {
+    currentIndex++;
+  } else {
+    currentIndex = 0;
+  }
 }
 
 void serialEvent() {
@@ -84,12 +87,14 @@ void serialEvent() {
     for (JsonPair p : root) {
       const char* key = p.key().c_str();
       const char* value = p.value();
-      if (key == "date") {
-        currentDate = String(value);
+      if (strcmp("date", key) == 0) {
+        currentDate = (char*)value;
+      } else {
+        // Memory gets overriden by something
+        const char* cityName = strdup(key);
+        locations[i] = Location{cityName, value};
+        i++;
       }
-
-      locations[i] = Location{key, value};
-      i++;
     }
     hasNewWeatherData = true;
   }
