@@ -3,7 +3,7 @@
 #include <timer.h>
 
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
-auto timer = timer_create_default();
+Timer<1> timer;
 
 const int contrastPin = A5;
 const int switchPin = 13;
@@ -22,7 +22,7 @@ int numberOfLocations = 0;
 Location locations[10];
 int currentIndex = 0;
 
-char* currentDate = "";
+const char* currentDate = "";
 boolean hasNewWeatherData = false;
 Timer<>::Task currentTask;
 
@@ -57,7 +57,7 @@ void loop() {
   timer.tick();
 }
 
-void showOnDisplay(void *) {
+bool showOnDisplay(void *) {
   lcd.clear();
   lcd.setCursor(0, 0);
   Location* loc = &locations[currentIndex];
@@ -74,16 +74,17 @@ void showOnDisplay(void *) {
   } else {
     currentIndex = 0;
   }
+  return true;
 }
 
 void serialEvent() {
-  String currentText = Serial.readString();
-  if (currentText != "" && currentText != NULL) {
+  String data = Serial.readString();
+  if (data != "" && data != NULL) {
     // clear locations
     memset(locations, 0, sizeof(locations));
     numberOfLocations = 0;
-    DynamicJsonDocument doc(200);
-    deserializeJson(doc, currentText);
+    DynamicJsonDocument doc(300);
+    deserializeJson(doc, data);
     JsonObject root = doc.as<JsonObject>();
     int i = 0;
     for (JsonPair p : root) {
@@ -92,9 +93,7 @@ void serialEvent() {
       if (strcmp("date", key) == 0) {
         currentDate = (char*)value;
       } else {
-        // Memory gets overriden by something
-        const char* cityName = strdup(key);
-        locations[i] = Location{cityName, value};
+        locations[i] = Location{key, value};
         i++;
         numberOfLocations++;
       }
