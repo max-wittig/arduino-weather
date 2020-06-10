@@ -1,11 +1,15 @@
 # Arduino weather
 
 Weather application that can show multiple locations with the current temperature
-for Arduino devices and connected LCD display compatible with
-the [LiquidCrystal display](https://www.arduino.cc/en/Reference/LiquidCrystal) library.
+for Arduino devices with connected LCD display.
 
 The tool consists of a part that runs on the Arduino and another part that can run on any
 system that supports Python 3.7+
+
+Required libraries:
+* [LiquidCrystal]((https://www.arduino.cc/en/Reference/LiquidCrystal)
+* [ArduinoJson](https://arduinojson.org/)
+* [arduino-timer](https://github.com/contrem/arduino-timer)
 
 ## Setup
 
@@ -17,6 +21,18 @@ The `weather.cpp` needs to be loaded onto the Arduino, before the Python script 
 with it. You may need to adjust it to your configuration.
 
 ## Usage
+
+### Arduino
+
+Using arduino-cli
+
+```sh
+arduino-cli lib install LiquidCrystal ArduinoJson arduino-timer
+arduino-cli compile -b arduino:avr:uno .
+arduino-cli upload -p $SERIAL_DEVICE --fqbn arduino:avr:uno .
+```
+
+### Serial host
 
 ```sh
 poetry run python -m arduino_weather
