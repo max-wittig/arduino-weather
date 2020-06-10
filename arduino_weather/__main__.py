@@ -24,14 +24,64 @@ dry = distutils.util.strtobool(os.getenv("DRY_MODE", "False"))
 client = pyowm.OWM(api_key)
 
 
+def translate(forecast: str) -> str:
+    # https://openweathermap.org/weather-conditions
+    forecast = forecast.lower()
+    forecast = forecast.replace("thunderstorm with light rain", "Gewitter+leichter Regen")
+    forecast = forecast.replace("thunderstorm with rain", "Gewitter+Regen")
+    forecast = forecast.replace("thunderstorm with heavy rain", "Gewitter+starker Regen")
+    forecast = forecast.replace("light thunderstorm", "leichtes Gewitter")
+    forecast = forecast.replace("broken clouds", "vereinzelt Wolken")
+    forecast = forecast.replace("clear sky", "Klarer Himmel")
+    forecast = forecast.replace("overcast clouds", "bedeckt")
+
+    forecast = forecast.replace("thunderstorm", "Gewitter")
+    forecast = forecast.replace("with", "mit")
+    forecast = forecast.replace("rain", "Regen")
+    forecast = forecast.replace("light", "leicht")
+    forecast = forecast.replace("heavy", "heftiger")
+    forecast = forecast.replace("drizzle", "tropfen")
+    forecast = forecast.replace("ragged", "stuermig")
+    forecast = forecast.replace("intensity", "Intensitaet")
+    forecast = forecast.replace("shower", "starker")
+    forecast = forecast.replace("moderate", "mittlerer")
+    forecast = forecast.replace("very", "sehr")
+    forecast = forecast.replace("extreme", "extrem")
+    forecast = forecast.replace("freezing", "gefrorener")
+    forecast = forecast.replace("snow", "Schnee")
+    forecast = forecast.replace("sleet", "Graupel")
+    forecast = forecast.replace("sky", "Himmel")
+    forecast = forecast.replace("clouds", "Wolken")
+    forecast = forecast.replace("broken", "gebrochene")
+    forecast = forecast.replace("few", "wenige")
+    forecast = forecast.replace("scattered", "einzelne")
+    forecast = forecast.replace("overcast", "ueberzogen")
+    forecast = forecast.replace("squalls", "Stuermboehen")
+    forecast = forecast.replace("dust", "Staub")
+    forecast = forecast.replace("sand", "Sand")
+    forecast = forecast.replace("fog", "Nebel")
+    forecast = forecast.replace("haze", "Dunst")
+    forecast = forecast.replace("smoke", "Rauch")
+    return forecast
+
+
+def get_forecast(location: str) -> str:
+    forecast = client.three_hours_forecast(location).get_forecast()
+    if not forecast:
+        return ""
+    result = ""
+    for cast in forecast:
+        return translate(cast.get_detailed_status())
+
+
 def get_weather() -> Dict[str, str]:
-    result = {"date": str(datetime.datetime.now(tz))[:16]}
+    results = []
     for location in locations.split(";"):
         temperature = (
             client.weather_at_place(location).get_weather().get_temperature("celsius")
         )
         city = location.split(",")[0][:7]
-        result[city] = str(temperature["temp"])
+        results.append({"city": city, "temp": str(temperature["temp"]), "forecast": get_forecast(location)[:16]})
     logger.info("Got weather update")
     return result
 

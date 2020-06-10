@@ -16,13 +16,13 @@ boolean inputAccepted = true;
 typedef struct {
   const char* city;
   const char* temp;
+  const char* forecast;
 } Location;
 int numberOfLocations = 0;
 
-Location locations[10];
+Location locations[5];
 int currentIndex = 0;
 
-const char* currentDate = "";
 boolean hasNewWeatherData = false;
 Timer<>::Task currentTask;
 
@@ -68,7 +68,7 @@ bool showOnDisplay(void *) {
   strcat(line1Buffer, " C");
   lcd.print(line1Buffer);
   lcd.setCursor(0, 1);
-  lcd.print(currentDate);
+  lcd.print(loc->forecast);
   if (currentIndex < numberOfLocations-1) {
     currentIndex++;
   } else {
@@ -85,19 +85,11 @@ void serialEvent() {
     numberOfLocations = 0;
     DynamicJsonDocument doc(300);
     deserializeJson(doc, data);
-    JsonObject root = doc.as<JsonObject>();
-    int i = 0;
-    for (JsonPair p : root) {
-      const char* key = p.key().c_str();
-      const char* value = p.value();
-      if (strcmp("date", key) == 0) {
-        currentDate = (char*)value;
-      } else {
-        locations[i] = Location{key, value};
-        i++;
-        numberOfLocations++;
-      }
+    JsonArray root = doc.as<JsonArray>();
+    for (JsonObject object : root) {
+      locations[numberOfLocations] = Location{object["city"], object["temp"], object["forecast"]};
+      numberOfLocations++;
     }
-    hasNewWeatherData = true;
   }
+  hasNewWeatherData = true;
 }
