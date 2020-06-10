@@ -7,7 +7,7 @@ The tool consists of a part that runs on the Arduino and another part that can r
 system that supports Python 3.7+
 
 Required libraries:
-* [LiquidCrystal]((https://www.arduino.cc/en/Reference/LiquidCrystal)
+* [LiquidCrystal](https://www.arduino.cc/en/Reference/LiquidCrystal)
 * [ArduinoJson](https://arduinojson.org/)
 * [arduino-timer](https://github.com/contrem/arduino-timer)
 
