@@ -27,9 +27,13 @@ client = pyowm.OWM(api_key)
 def translate(forecast: str) -> str:
     # https://openweathermap.org/weather-conditions
     forecast = forecast.lower()
-    forecast = forecast.replace("thunderstorm with light rain", "Gewitter+leichter Regen")
+    forecast = forecast.replace(
+        "thunderstorm with light rain", "Gewitter+leichter Regen"
+    )
     forecast = forecast.replace("thunderstorm with rain", "Gewitter+Regen")
-    forecast = forecast.replace("thunderstorm with heavy rain", "Gewitter+starker Regen")
+    forecast = forecast.replace(
+        "thunderstorm with heavy rain", "Gewitter+starker Regen"
+    )
     forecast = forecast.replace("light thunderstorm", "leichtes Gewitter")
     forecast = forecast.replace("broken clouds", "vereinzelt Wolken")
     forecast = forecast.replace("clear sky", "Klarer Himmel")
@@ -81,7 +85,13 @@ def get_weather() -> Dict[str, str]:
             client.weather_at_place(location).get_weather().get_temperature("celsius")
         )
         city = location.split(",")[0][:7]
-        results.append({"city": city, "temp": str(temperature["temp"]), "forecast": get_forecast(location)[:16]})
+        results.append(
+            {
+                "city": city,
+                "temp": str(temperature["temp"]),
+                "forecast": get_forecast(location)[:16],
+            }
+        )
     logger.info("Got weather update")
     return result
 
