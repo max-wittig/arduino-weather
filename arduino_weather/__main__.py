@@ -93,7 +93,7 @@ def get_weather() -> Dict[str, str]:
             }
         )
     logger.info("Got weather update")
-    return result
+    return results
 
 
 def main():
